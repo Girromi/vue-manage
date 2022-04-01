@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import App from './App.vue'
-import { Button, Radio, Container, Main, Header, Aside, Menu, Submenu, MenuItem, MenuItemGroup, Dropdown, DropdownMenu, DropdownItem, Row, Col, Card, Table, TableColumn } from 'element-ui';
+import { Button, Radio, Container, Main, Header, Aside, Menu, Submenu, MenuItem, MenuItemGroup, Dropdown, DropdownMenu, DropdownItem, Row, Col, Card, Table, TableColumn, Breadcrumb, BreadcrumbItem, Tag } from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import './assets/less/index.less'
 
 import router from '../router'
 import store from '../store'
+import http from 'axios'
+import '../api/mock.js'
 
 Vue.config.productionTip = false
 Vue.use(Button)
@@ -26,6 +28,11 @@ Vue.use(Col)
 Vue.use(Card)
 Vue.use(Table)
 Vue.use(TableColumn)
+Vue.use(Breadcrumb)
+Vue.use(BreadcrumbItem)
+Vue.use(Tag)
+
+Vue.prototype.$http = http
 
 new Vue({
    store,

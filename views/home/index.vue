@@ -24,7 +24,7 @@
     </el-col>
     <el-col style="margin-top:20px" :span="16">
       <div class="num">
-        <el-card v-for="item in countData" :key="item.name" :body-style="{display:flex,padding:0 }">
+        <el-card v-for="item in countData" :key="item.name" :body-style="{display:'flex',padding:0 }">
           <i class="icon" :class="`el-icon-${item.icon}`" :style="{background:item.color}" style="float:left"></i>
           <div class="detail">
             <p class="num" style="margin:12px 40px">￥{{item.value}}</p>
@@ -32,58 +32,37 @@
           </div>
         </el-card>
       </div>
-      <el-card style="height:280px"></el-card>
+      <el-card style="height:280px">
+        <!-- <div style="height:280px" ref="echarts"></div> -->
+        <echart :chartData="echartData.order" style="height:280px" />
+      </el-card>
       <div class="graph">
-        <el-card style="height:260px"></el-card>
-        <el-card style="height:260px"></el-card>
+        <el-card style="height:260px">
+          <!-- <div style="height:240px" ref="userEcharts"></div> -->
+          <echart :chartData="echartData.user" style="height:240px" />
+        </el-card>
+        <el-card style="height:260px">
+          <!-- <div style="height:240px" ref="videoEcharts"></div> -->
+          <echart :chartData="echartData.video" :isAxisChart="false" style="height:240px" />
+        </el-card>
       </div>
     </el-col>
   </el-row>
 </template>
 <script>
+import { getData } from '../../api/data'
+// import * as echarts from 'echarts'
+import Echart from '../../src/components/Echarts.vue'
+
 export default {
   name: 'home',
+  components: {
+    Echart
+  },
   data () {
     return {
       userImg: require('../../src/assets/images/user.png'),
-      tableData: [
-        {
-          name: 'oppo',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800,
-        },
-        {
-          name: 'vivo',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800,
-        },
-        {
-          name: '苹果',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800,
-        },
-        {
-          name: '小米',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800,
-        },
-        {
-          name: '三星',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800,
-        },
-        {
-          name: '魅族',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800,
-        }
-      ],
+      tableData: [],
       tableLabel: {
         name: '课程',
         todayBuy: "今日购买",
@@ -127,8 +106,147 @@ export default {
           icon: "s-goods",
           color: "#5ab1ef",
         }
-      ]
+      ],
+      echartData: {
+        order: {
+          xData: [],
+          series: []
+        },
+        user: {
+          xData: [],
+          series: []
+        },
+        video: {
+          series: []
+        }
+      }
     }
+  },
+  mounted () {
+    getData().then(res => {
+      const { code, data } = res.data
+      if (code === 20000) {
+        this.tableData = data.tableData
+        const order = data.orderData
+        const xData = order.date
+        const keyArray = Object.keys(order.data[0])
+        const series = []
+        keyArray.forEach(key => {
+          series.push({
+            name: key,
+            data: order.data.map(item => item[key]),
+            type: 'line'
+          })
+        })
+
+        //   const option = {
+        //     xAxis: {
+        //       data: xData
+        //     },
+        //     yAxis: {},
+        //     legend: {
+        //       data: keyArray
+        //     },
+        //     series
+        //   }
+        this.echartData.order.xData = xData
+        this.echartData.order.series = series
+
+        //   const E = echarts.init(this.$refs.echarts)
+        //   E.setOption(option)
+
+        //用户图
+        //   const userOption = {
+        //     legend: {
+        //       textStyle: {
+        //         color: "#333",
+        //       },
+        //     },
+        //     grid: {
+        //       left: "20%",
+        //     },
+        //     //提示框
+        //     tooltip: {
+        //       trigger: "axis",
+        //     },
+        //     xAxis: {
+        //       type: "category",
+        //       data: data.userData.map(item => item.date),
+        //       axisLine: {
+        //         lineStyle: {
+        //           color: "#17b3a3",
+        //         },
+        //       },
+        //       axisLabel: {
+        //         literval: 0,
+        //         color: "#333",
+        //       },
+        //     },
+        //     yAxis: [
+        //       {
+        //         type: "value",
+        //         axisLine: {
+        //           lineStyle: {
+        //             color: "#17b3a3",
+        //           },
+        //         },
+        //       },
+        //     ],
+        //     color: ["#2ec7c9", "#b6a2de"],
+        //     series: [
+        //       {
+        //         name: '新增用户',
+        //         data: data.userData.map(item => item.new),
+        //         type: 'bar'
+        //       },
+        //       {
+        //         name: '活跃用户',
+        //         data: data.userData.map(item => item.active),
+        //         type: 'bar'
+        //       }
+        //     ],
+        //   }
+
+        this.echartData.user.xData = data.userData.map(item => item.date)
+        this.echartData.user.series = [
+          {
+            name: '新增用户',
+            data: data.userData.map(item => item.new),
+            type: 'bar'
+          },
+          {
+            name: '活跃用户',
+            data: data.userData.map(item => item.active),
+            type: 'bar'
+          }
+        ]
+
+        //   const U = echarts.init(this.$refs.userEcharts)
+        //   U.setOption(userOption)
+
+        //   const videoOption = {
+        //     //提示框
+        //     tooltip: {
+        //       trigger: "item",
+        //     },
+        //     series: [
+        //       {
+        //         data: data.videoData,
+        //         type: 'pie'
+        //       }
+        //     ],
+        //   }
+        //   const V = echarts.init(this.$refs.videoEcharts)
+        //   V.setOption(videoOption)
+
+        this.echartData.video.series = [
+          {
+            data: data.videoData,
+            type: 'pie'
+          }
+        ]
+      }
+    })
   }
 }
 </script>
